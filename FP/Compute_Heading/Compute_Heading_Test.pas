@@ -67,7 +67,8 @@ Assert(Eq_Double(radtodeg(Compute_Tilt_NE(0,0,0,0,0,10)),90.0,-6),'Compute_Tilt_
 Assert(Eq_Double(radtodeg(Compute_Tilt_NE(0,0,0,0,0,-10)),-90.0,-6),'Compute_Tilt_NE Failed 5.17' );
 Assert(Eq_Double(radtodeg(Compute_Tilt_NE(0,0,0,0,10,0)),0,-6),'Compute_Tilt_NE Failed 5.18' );
 
-
+HD:=-1;
+VD:=-1;
 
 VA_SD_To_HD_VD (degtorad(90),10, HD, VD);
 Assert(Eq_Double(HD, 0.0,-8),' VA_SD_To_HD_VD Failed 1.1' );
@@ -125,6 +126,10 @@ VA_SD_To_HD_VD (degtorad(135),10, HD, VD);
 Assert(Eq_Double(HD,7.07106781,-8),' VA_SD_To_HD_VD Failed 14.1' );
 Assert(Eq_Double(VD,7.07106781,-8),' VA_SD_To_HD_VD Failed 14.2' );
 
+dN := -1;
+dE := -1;
+dH := -1;
+   
 AZ_SD_To_dN_dE_dH(degtorad(0),degtorad(0),10,dN,dE,dH);
 Assert(Eq_Double(dN,10,-8),' AZ_SD_To_dN_dE_dH Failed 1.1.1' );
 Assert(Eq_Double(dE,0,-8),' AZ_SD_To_dN_dE_dH Failed 1.1.2' );

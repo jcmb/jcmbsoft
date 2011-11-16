@@ -6,9 +6,6 @@ PROCEDURE Test_Compute_Pitch_And_Heading;
 
 IMPLEMENTATION
 
-USES
-   Math,
-   Math_GRK;
 
 {$ASSERTIONS ON}
 

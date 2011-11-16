@@ -1,16 +1,23 @@
 PROGRAM Adjust_Height;
 {$mode delphi}
 USES
-   Math,
    AWK_Unit,
-   Extra_Strings,
-   Math_GRK;
+   Extra_Strings;
+
+CONST
+   Program_Name = 'Adjust_Height';
+   Program_Version = 1.1;
+
 
 procedure Help;
 begin
-WriteLn(STDERR,'Adjust Height: <Height Adjustment> <Pt,N,E,H FileName>');
+WriteLn(STDERR,'Usage: ' + Program_Name + ' <Pt,N,E,H FileName> <Height Adjustment>');
 WriteLn(STDERR,'');
 WriteLn(STDERR,'Adjusts the height in the file');
+WriteLn(STDERR,'');
+WriteLn(STDERR, Program_Name,' V', Program_Version:1:1);
+WriteLn(STDERR,'Copyright: JCMBsoft, 2011. JCMBSoft.com');
+WriteLn(STDERR,'');
 halt (1);
 end;
 
@@ -32,7 +39,7 @@ if paramcount <> 2 then
    Help;
    end;
 
-Height_Adjustment := Str2Double(paramstr(1));
+Height_Adjustment := Str2Double(paramstr(2));
 
 if (String_Convert_Error <> 0) Or (Height_Adjustment = 0) then
    begin
@@ -40,7 +47,7 @@ if (String_Convert_Error <> 0) Or (Height_Adjustment = 0) then
    Help;
    END;
 
-AssignFile(Input_File,Paramstr(2));
+AssignFile(Input_File,Paramstr(1));
 Reset(Input_File);
 Awk := TAwk.Create;
 AWK.FS := ',';

@@ -1,0 +1,27 @@
+-k-macosx_version_min 10.5
+-Ci
+#IO
+-Co
+#Integer Overflow
+-Cr
+#Range Checking
+-Mdelphi
+-Sa
+#asserts
+-vw
+-vn
+-vh
+-ve
+-Fi../../lib
+-Fu../../lib
+#IFDEF INTERNAL 
+-FE/Users/Gkirk/FPC_OUT_INTERNAL
+-FU/Users/Gkirk/FPC_UNITS
+-Fi../../lib_int
+-Fu../../lib_int
+#ELSE
+-FE/Users/Gkirk/FPC_OUT
+-FU/Users/Gkirk/FPC_UNITS
+-Fi../../lib_ext
+-Fu../../lib_ext
+#ENDIF

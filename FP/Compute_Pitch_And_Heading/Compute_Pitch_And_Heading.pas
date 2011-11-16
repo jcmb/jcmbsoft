@@ -7,11 +7,19 @@ USES
    Compute_Pitch_And_Heading_Test,
    Math_GRK;
 
+CONST
+   Program_Name = 'Compute_Pitch_And_Heading';
+   Program_Version = 1.1;
+
 procedure Help;
 begin
-WriteLn(STDERR,'Compute_Pitch_And_Heading: <Left_Antenna_FileName> <Right_Antenna File>');
+WriteLn(STDERR,'Usage: '+ Program_Name + ' <Left_Antenna_FileName> <Right_Antenna File>');
 WriteLn(STDERR,'');
 WriteLn(STDERR,'Computes Pitch and heading for two points, the pitch and heading is computed from the Left Antenna');
+WriteLn(STDERR,'');
+WriteLn(STDERR, Program_Name,' V', Program_Version:1:1);
+WriteLn(STDERR,'Copyright: JCMBsoft, 2011. JCMBSoft.com');
+WriteLn(STDERR,'');
 halt (1);
 end;
 
@@ -88,7 +96,7 @@ WHILE Left_Awk.Next_Record (Left_File) DO
       Tilt     := RadToDeg(Compute_Tilt_NE(N_Left,E_Left,H_Left,N_Right,E_Right,H_Right));
       Heading  := RadToDeg(Compute_Heading_NE(N_Left,E_Left,N_Right,E_Right));
       Distance := Compute_Distance_NE(N_Left,E_Left,N_Right,E_Right);
-      WriteLn(Left_Time:0:2,',',N_Left:0:3,',',E_Left:0:3,',',H_Left:0:3,',', N_Right:0:3,',',E_Right:0:3,',',H_Right:0:3,',',Distance:0:3,',',Heading:0:3,',', Tilt:0:3);
+      WriteLn(Left_Time:0:2,',',N_Left:0:3,',',E_Left:0:3,',',H_Left:0:3,',',Distance:0:3,',', Heading:0:3,',', N_Right:0:3,',',E_Right:0:3,',',H_Right:0:3,',', Tilt:0:3);
       END;
    END;
 CloseFile(Left_File);

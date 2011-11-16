@@ -7,11 +7,21 @@ USES
    Compute_Pitch_Test,
    Math_GRK;
 
+
+CONST
+   Program_Name = 'Compute_Pitch';
+   Program_Version = 1.1;
+
+
 procedure Help;
 begin
-WriteLn(STDERR,'Compute_Pitch: <Computed_Heading_FileName> <Pitch File>');
+WriteLn(STDERR,'Usage: '+ Program_Name + ' <Computed_Heading_File> <Pitch File>');
 WriteLn(STDERR,'');
 WriteLn(STDERR,'Computes Pitch for points in a Computed Heading filename and the pitch point from the pitch file');
+WriteLn(STDERR,'');
+WriteLn(STDERR, Program_Name,' V', Program_Version:1:1);
+WriteLn(STDERR,'Copyright: JCMBsoft, 2011. JCMBSoft.com');
+WriteLn(STDERR,'');
 halt (1);
 end;
 
@@ -90,7 +100,7 @@ WHILE Heading_Awk.Next_Record (Heading_File) DO
       BEGIN
       Tilt := RadToDeg(Compute_Tilt_NE(N_Heading,E_Heading,H_Heading,N_Pitch,E_Pitch,H_Pitch));
       Pitch_Distance := Compute_Distance_NE(N_Heading,E_Heading,N_Pitch,E_Pitch);
-      WriteLn(Pitch_Time:0:2,',',N_Heading:0:3,',',E_Heading:0:3,',',H_Heading:0:3,',',Heading_Distance:0:3,',', Heading:0:3, ',', N_Pitch:0:3,',',E_Pitch:0:3,',',H_Pitch:0:3,',',Pitch_Distance:0:3,',',H_Heading-H_Pitch:0:3,',', Tilt:0:3);
+      WriteLn(Pitch_Time:0:2,',',N_Heading:0:3,',',E_Heading:0:3,',',H_Heading:0:3,',',Heading_Distance:0:3,',', Heading:0:3, ',', N_Pitch:0:3,',',E_Pitch:0:3,',',H_Pitch:0:3,',', Tilt:0:3,',',Pitch_Distance:0:3,',',H_Heading-H_Pitch:0:3);
       END;
    END;
 CloseFile(Heading_File);
