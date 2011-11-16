@@ -1,0 +1,16 @@
+FIRST_CLIENT=191
+LAST_CLIENT=200
+USER=grk
+PASS=grk_password
+ORG=ntrip3
+BASE_ORG=ntrip1
+IBSS_SERVER=ibss.trimbleos.com
+TEST_TIME=20
+BASE=SPS852.INFO-\(ntrip1\)
+ADD_NUMBER_TO_USER_PASS=1
+#DELETE_FILES=1
+http_proxy=http://proxy.trimble.com:3128
+#http_proxy=
+#CYGWIN=1
+STARTUP_DELAY=0
+TMP_DATA_PATH=/tmp
