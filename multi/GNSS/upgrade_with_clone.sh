@@ -66,7 +66,7 @@ while getopts "p:i:c:f:s:z:n" options; do
        c ) clone=$OPTARG;;
        f ) file=$OPTARG;;
        z ) proxy="-z";;
-       n ) run="";;
+       n ) run="";resend="no";;
        u ) resend="no";;
        * ) Usage;;
    esac

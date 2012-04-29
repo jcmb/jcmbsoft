@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 Dir=`dirname $0`;
 pushd . &>/dev/null
