@@ -1,6 +1,7 @@
-#!/bin/bash
+#!/bin/bash 
+shopt -s failglob
 
-ROBBIE_CONF=/etc/Robbie.d/
+ROBBIE_CONF=/etc/Robbie.d
 
 if [ -e /tmp/Robbie.Run ]
 then
@@ -16,6 +17,11 @@ then
    mkdir /tmp/Robbie
 fi
 
+if [ ! -d /var/Robbie ]
+then
+   mkdir /var/Robbie
+fi
+
 cd /tmp/Robbie
 
 rm Robbie.table &>/dev/null
@@ -24,41 +30,56 @@ let now=now-300
 #let now=now-3000
 #let now=now+30000
 #echo $now
-for f in "*.time"
+
+for f in $ROBBIE_CONF/*.interval
 do
 #   echo $f
-   filename=`basename $f .time`
-   if [ ! -s $ROBBIE_CONF$filename.interval ]
+   filename=`basename $f .interval`
+   if [ ! -s $filename.time ]
    then
-      echo -n "<tr><td>$filename</td><td></td><td>No Interval File</td></tr>" >>Robbie.table
-      logger "Internal Error: No interval file for $filename"
-      echo "Internal Error: No interval file for $filename"
+      echo -n "<tr><td>$filename</td><td></td><td>No Files since last restart</td></tr>" >>Robbie.table
+      logger "Error: No time file for $filename"
    else
       last_update=`cat $filename.time`
+      updatetime=`cat $f`
       let expected_update=now-updatetime
+      echo $expected_update
       echo -n "<tr><td>$filename</td><td> " `date -j -f%s $last_update` " </td><td>" >>Robbie.table
-    #  echo $expected_update
       if [ $last_update -lt $expected_update ]
       then
-         if [ -e $filename.not_working ]
+         if [ -e /var/Robbie/$filename.not_working ]
          then
             echo "Not Working" >>Robbie.table
          else
-            rm $filename.working &>/dev/null
-            echo $last_update >$filename.not_working
+            rm /var/Robbie/$filename.working &>/dev/null
+            echo $last_update >/var/Robbie/$filename.not_working
             echo -n "<b>Not Working</b>">>Robbie.table
+            mail -s "$filename Not Working" Geoffrey_Kirk@Trimble.com </dev/null &>/dev/null
          fi
       else
-         if [ -e $filename.working ]
+         if [ -e /var/Robbie/$filename.working ]
          then
             echo "Working" >>Robbie.table
          else
-            rm $filename.not_working &>/dev/null
-            echo $last_update >$filename.working
+            rm /var/Robbie/$filename.not_working &>/dev/null
+            echo $last_update >/var/Robbie/$filename.working
             echo -n "<b>Working</b>" >>Robbie.table
+            mail -s "$filename Now Working" Geoffrey_Kirk@Trimble.com </dev/null &>/dev/null
          fi
       fi
    echo "</td></tr>" >>Robbie.table
+   fi
+done
+
+
+for f in *.time
+do
+#   echo $f
+   filename=`basename $f .time`
+   if [ ! -s $ROBBIE_CONF/$filename.interval ]
+   then
+      echo -n "<tr><td>$filename</td><td></td><td>No Interval Files</td></tr>" >>Robbie.table
+      logger "Internal Error: No intervale file for $filename"
    fi
 done
 
