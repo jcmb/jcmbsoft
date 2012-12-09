@@ -1,4 +1,4 @@
-#! /bin/bash 
+#! /bin/bash
 source ./configuration$CFG_NUM
 echo -en "POST /$BASE$1 HTTP/1.1\r\n">$TMP_DATA_PATH/IBSS_Login-$1.txt
 echo -en "Host: $ORG.ibss.trimbleos.com:2101\r\n">>$TMP_DATA_PATH/IBSS_Login-$1.txt
@@ -6,7 +6,7 @@ echo -en "X-VERSION=4.15\r\n">>$TMP_DATA_PATH/IBSS_Login-$1.txt
 echo -en "X-WARRANTY-DATE=2011-04-01\r\n">>$TMP_DATA_PATH/IBSS_Login-$1.txt
 echo -en "X-OPTION-KEY=1fYtudk.gx1gnqOELT0ea5vUTBTOiavGBAVg8rfTQaaW7rLn/W7SvZ/hG2wATc2wkzrMwZuGNG2s\r\n">>$TMP_DATA_PATH/IBSS_Login-$1.txt
 
-if [ $CHUNKED ] 
+if [ $CHUNKED ]
 then
     echo -en "Transfer-Encoding: chunked\r\n" >>$TMP_DATA_PATH/IBSS_Login-$1.txt
 fi
@@ -23,8 +23,8 @@ before="$(date +%s)"
 
 if [ "$FAKE_LOAD" == "1" ]
 then
-    if [ $CHUNKED ] 
-    then 
+    if [ $CHUNKED ]
+    then
 	echo  Starting NTRIP Server Connection $1, Faked Chunked
 	./Time_Length.pl $BPS $TEST_TIME | ./Make_Chunks.pl | cat $TMP_DATA_PATH/IBSS_Login-$1.txt - | nc  $ORG.$IBSS_SERVER 2101 >$TMP_DATA_PATH/server_reply_$BASE$1
     else
@@ -32,7 +32,7 @@ then
 	./Time_Length.pl $BPS $TEST_TIME | cat $TMP_DATA_PATH/IBSS_Login-$1.txt - | nc  $ORG.$IBSS_SERVER 2101 >$TMP_DATA_PATH/server_reply_$BASE$1
     fi
 else
-    if [ $CHUNKED ] 
+    if [ $CHUNKED ]
     then
 	echo  Starting NTRIP Server Connection $1, Chunked
         tail -f -c 1000 $TMP_DATA_PATH/nc_data | ./Break_Pipe.pl $TEST_TIME | ./Make_Chunks.pl | cat $TMP_DATA_PATH/IBSS_Login-$1.txt - | nc   $ORG.$IBSS_SERVER 2101 >$TMP_DATA_PATH/server_reply_$BASE$1
@@ -44,7 +44,7 @@ fi
 
 after="$(date +%s)"
 tested_time=$(expr $after - $before);
-   
+
 echo  NTRIP Server Connection $1, Closing after $tested_time seconds, expected test time $TEST_TIME
 echo "$1,-1,-1,$tested_time" >ntrip_server_results$CFG_NUM.csv
 
