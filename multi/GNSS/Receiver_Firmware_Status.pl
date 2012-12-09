@@ -9,14 +9,24 @@ use WWW::Mechanize;
 use XML::Simple;
 use Data::Dumper;
 
+use MIME::Base64;
+
 my $receiver=$ARGV[0];
 
 if ( !defined $receiver ) {
     print "Usage: Receiver_Firmware_Status receiver_IP\n";
     exit;
    }
+
+if ($ARGV[1]) {
+    $browser->default_header( Authorization => 'Basic ' . encode_base64($ARGV[1]));
+#   print "User $ARGV[1]\n"
+}
+
+
 printf "Monitoring firmware upgrade status for $receiver\n";
 my $browser = WWW::Mechanize->new(autocheck => 1);
+$browser->env_proxy();
 #$browser->timeout (5);
 #$browser->show_progress(1);
 my $FW_Status = "";
@@ -54,6 +64,11 @@ while ( $Working ) {
 		  if ($State eq "FIRMWARE_DONE") {
    	            $Working = 0;
      		    }
+
+		  if ($State eq "FIRMWARE_INTERRUPTED") {
+   	            $Working = 0;
+     		    }
+
 
 		  if ($State eq "FIRMWARE_IDLE") {
 		     if ($Count >= 5) {
