@@ -21,6 +21,18 @@ if ! type curl &> /dev/null ; then
    exit 2
 fi
 
+if ! type Check_Clone_Valid.pl  &> /dev/null ; then
+   echo "Required Check_Clone_Valid.pl $file.xml executable not found in $PATH" >&2
+   exit 2
+fi
+
+if ! type Receiver_Clone_Status.pl  &> /dev/null ; then
+   echo "Required Receiver_Clone_Status.pl  executable not found in $PATH" >&2
+   exit 2
+fi
+
+
+
 userpass="admin:password";
 failsafe="no";
 proxy="disable";
@@ -59,7 +71,8 @@ echo "Creating clone file"
 curl --silent -o /dev/null  "http://$userpass@$ip/cgi-bin/app_fileUpdate.xml?operation=8&fileNumber=1&cloneFileName=$file.xml&Year=2010&Month=1&Day=1&Hour=0&Minute=0&RepeatMin=0&newAppFileName=&CloneFileName=$file&newCloneFileName=$file&cloneSecurityEnable=on&cloneTcpUdpPortEnable=on&cloneEtherBootEnable=on&cloneHttpEnable=on&cloneEmailFtpNtpEnable=on&cloneDataLoggerEnable=on&clonePositionEnable=on&cloneEphAlmEnable=on&cloneAlmEnable=on&cloneMiscellaneousEnable=on"
 
 #echo sleeping 10 seconds
-sleep 10
+sleep 1
+Receiver_Clone_Status.pl $ip
 
 echo "Downloading clone file: $file.xml"
 curl --silent -o $file.xml  "http://$userpass@$ip/clone_file/$file.xml?gzipFlag=false"
