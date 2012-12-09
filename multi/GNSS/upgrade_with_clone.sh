@@ -28,29 +28,36 @@ export PATH
 
  # Tests for curl executable
 if ! type curl &> /dev/null ; then
-   echo "Required curl executable not found in $PATH" >&2
+   echo "${0##*/} Required curl executable not found in $PATH" >&2
    exit 2
 fi
 
 if ! type firmware_upgrade.sh &> /dev/null ; then
-   echo "Required firmware_upgrade.sh not found in $PATH" >&2
+   echo "${0##*/} Required firmware_upgrade.sh not found in $PATH" >&2
    exit 2
 fi
 
 if ! type get_clone.sh &> /dev/null ; then
-   echo "Required get_clone.sh not found in $PATH" >&2
+   echo "${0##*/} Required get_clone.sh not found in $PATH" >&2
    exit 2
 fi
 
 if ! type send_clone.sh &> /dev/null ; then
-   echo "Required send_clone.sh not found in $PATH" >&2
+   echo "${0##*/} Required send_clone.sh not found in $PATH" >&2
    exit 2
 fi
 
 if ! type receiver_version.pl &> /dev/null ; then
-   echo "Required receiver_version.pl not found in $PATH" >&2
+   echo "${0##*/} Required receiver_version.pl not found in $PATH" >&2
    exit 2
 fi
+
+if ! type Receiver_Firmware_Status.pl &> /dev/null ; then
+   echo "${0##*/} Required Receiver_Firmware_Status.pl not found in $PATH" >&2
+   exit 2
+fi
+
+
 
 userpass="admin:password";
 failsafe="yes";
@@ -127,7 +134,7 @@ fi
 
 if [ -z $resend ]
 then
-   echo "Waiting for receive to reboot."
+   echo "Waiting for receiver to reboot."
    sleep 120
    echo "Sending Clone file"
    send_clone.sh -i $ip -c $clone -p $userpass $proxy
