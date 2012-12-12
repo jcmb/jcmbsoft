@@ -21,25 +21,25 @@ if [ -z $3 ] ;
 then
    echo "Current Firmware: "
    #Base 900
-   upgrade_with_clone.sh  -i site.co-test-site.com:2105 -n -p $1:$2 -c TS_B_9
+   upgrade_with_clone.sh  -i site.co-test-site.com:2105 -n -p $1:$2 -c TS_B_9 -z
    #Base 450
-   upgrade_with_clone.sh  -i site.co-test-site.com:2106 -n -p $1:$2 -c TS_B_4
+   upgrade_with_clone.sh  -i site.co-test-site.com:2106 -n -p $1:$2 -c TS_B_4 -z
    #Rover 1
-   upgrade_with_clone.sh  -i site.co-test-site.com:28001 -n -p $1:$2 -c TS_R_1
+   upgrade_with_clone.sh  -i site.co-test-site.com:28001 -n -p $1:$2 -c TS_R_1 -z
    #Rover 2
-   upgrade_with_clone.sh  -i site.co-test-site.com:28002 -n -p $1:$2 -c TS_R_2
+   upgrade_with_clone.sh  -i site.co-test-site.com:28002 -n -p $1:$2 -c TS_R_2 -z
    #Rover 3
-   upgrade_with_clone.sh  -i site.co-test-site.com:28003 -n -p $1:$2 -c TS_R_3
+   upgrade_with_clone.sh  -i site.co-test-site.com:28003 -n -p $1:$2 -c TS_R_3 -z
    exit
 fi
 
 #Base 900
-upgrade_with_clone.sh  -i site.co-test-site.com:2105 -p $1:$2 -c TS_B_9 -f $3
+upgrade_with_clone.sh  -i site.co-test-site.com:2105 -p $1:$2 -c TS_B_9 -f $3 -z
 #Base 450
-upgrade_with_clone.sh  -i site.co-test-site.com:2106 -p $1:$2 -c TS_B_4 -f $4
+upgrade_with_clone.sh  -i site.co-test-site.com:2106 -p $1:$2 -c TS_B_4 -f $4 -z
 #Rover 1
-upgrade_with_clone.sh  -i site.co-test-site.com:28001 -p $1:$2 -c TS_R_1 -f $3
+upgrade_with_clone.sh  -i site.co-test-site.com:28001 -p $1:$2 -c TS_R_1 -f $3 -z
 #Rover 2
-upgrade_with_clone.sh  -i site.co-test-site.com:28002 -p $1:$2 -c TS_R_2 -f $4
+upgrade_with_clone.sh  -i site.co-test-site.com:28002 -p $1:$2 -c TS_R_2 -f $4 -z
 #Rover 3
-upgrade_with_clone.sh  -i site.co-test-site.com:28003 -p $1:$2 -c TS_R_3 -f $3
+upgrade_with_clone.sh  -i site.co-test-site.com:28003 -p $1:$2 -c TS_R_3 -f $3 -z

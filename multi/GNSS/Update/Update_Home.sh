@@ -20,18 +20,18 @@ if [ -z $3 ] ;
 then
    echo "Current Firmware: "
    #28000
-   upgrade_with_clone.sh  -i Kirk.dyndns.info:28000 -n -p $1:$2 -c Home-46
+   upgrade_with_clone.sh  -i Kirk.dyndns.info:28000 -n -p $1:$2 -c Home-46 -z
    # 28005
-   upgrade_with_clone.sh  -i Kirk.dyndns.info:28005 -n -p $1:$2 -c Home-47
+   upgrade_with_clone.sh  -i Kirk.dyndns.info:28005 -n -p $1:$2 -c Home-47 -z
    # 2100
-   upgrade_with_clone.sh  -i Kirk.dyndns.info:2100 -n -p $1:$2 -c Home-48
+   upgrade_with_clone.sh  -i Kirk.dyndns.info:2100 -n -p $1:$2 -c Home-48 -z
    # 28010
-   upgrade_with_clone.sh  -i Kirk.dyndns.info:28010 -n -p $1:$2 -c Home-49
+   upgrade_with_clone.sh  -i Kirk.dyndns.info:28010 -n -p $1:$2 -c Home-49 -z
    exit
 fi
 
-upgrade_with_clone.sh  -i Kirk.dyndns.info:28000 -c Home-46 -p $1:$2 -f $3
-upgrade_with_clone.sh  -i Kirk.dyndns.info:28005 -c Home-47 -p $1:$2 -f $3
-upgrade_with_clone.sh  -i Kirk.dyndns.info:2100 -c Home-48 -p $1:$2 -f $3
-upgrade_with_clone.sh  -i Kirk.dyndns.info:28010 -c Home-49 -p $1:$2 -f $3
+upgrade_with_clone.sh  -i Kirk.dyndns.info:28000 -c Home-46 -p $1:$2 -f $3 -z
+upgrade_with_clone.sh  -i Kirk.dyndns.info:28005 -c Home-47 -p $1:$2 -f $3 -z
+upgrade_with_clone.sh  -i Kirk.dyndns.info:2100 -c Home-48 -p $1:$2 -f $3 -z
+upgrade_with_clone.sh  -i Kirk.dyndns.info:28010 -c Home-49 -p $1:$2 -f $3 -z
 

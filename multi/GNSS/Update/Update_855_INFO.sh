@@ -20,13 +20,13 @@ if [ -z $3 ] ;
 then
    echo "Current Firmware: "
    # Base
-   upgrade_with_clone.sh  -i sps855.info:81 -n -p $1:$2 -c 855BASE
+   upgrade_with_clone.sh  -i sps855.info:81 -n -p $1:$2 -c 855BASE -z
    # Rover
-   upgrade_with_clone.sh  -i sps852.info -n -p $1:$2 -c 855ROVE
+   upgrade_with_clone.sh  -i sps852.info -n -p $1:$2 -c 855ROVE -z
    exit
 fi
 
-upgrade_with_clone.sh  -i sps855.info:81 -p $1:$2 -c 855BASE -f $3
-upgrade_with_clone.sh  -i sps852.info -p $1:$2 -c 855ROVE -f $3
+upgrade_with_clone.sh  -i sps855.info:81 -p $1:$2 -c 855BASE -f $3 -z
+upgrade_with_clone.sh  -i sps852.info -p $1:$2 -c 855ROVE -f $3 -z
 
 
