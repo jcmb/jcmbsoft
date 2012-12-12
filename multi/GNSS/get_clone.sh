@@ -72,7 +72,7 @@ curl --silent -o /dev/null  "http://$userpass@$ip/cgi-bin/app_fileUpdate.xml?ope
 
 #echo sleeping 10 seconds
 sleep 1
-Receiver_Clone_Status.pl $ip
+Receiver_Clone_Status.pl $userpass@$ip
 
 echo "Downloading clone file: $file.xml"
 curl --silent -o $file.xml  "http://$userpass@$ip/clone_file/$file.xml?gzipFlag=false"
