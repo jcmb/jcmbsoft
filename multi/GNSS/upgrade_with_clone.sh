@@ -66,7 +66,7 @@ proxy="";
 run="1";
 resend="";
 
-while getopts "p:i:c:f:s:z:n" options; do
+while getopts "p:i:c:f:s:zn" options; do
    case $options in
        p ) userpass=$OPTARG;;
        i ) ip=$OPTARG;;
@@ -128,7 +128,7 @@ if [ -n "$run"  ]; then
     echo "Upgrading firmware for $ip"
     firmware_upgrade.sh  -i $ip -f $file -p $userpass $proxy&
 #    echo Wait for receiver to reboot and format, which can take upto 5 minutes
-    Receiver_Firmware_Status.pl $ip
+    Receiver_Firmware_Status.pl $userpass@$ip
     echo "Receiver $ip upgraded"
 fi
 
