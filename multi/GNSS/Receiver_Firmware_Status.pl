@@ -18,15 +18,18 @@ if ( !defined $receiver ) {
     exit;
    }
 
+printf "Monitoring firmware upgrade status for $receiver\n";
+my $browser = WWW::Mechanize->new(autocheck => 1);
+$browser->env_proxy();
+
 if ($ARGV[1]) {
     $browser->default_header( Authorization => 'Basic ' . encode_base64($ARGV[1]));
 #   print "User $ARGV[1]\n"
 }
 
 
-printf "Monitoring firmware upgrade status for $receiver\n";
-my $browser = WWW::Mechanize->new(autocheck => 1);
-$browser->env_proxy();
+
+
 #$browser->timeout (5);
 #$browser->show_progress(1);
 my $FW_Status = "";
