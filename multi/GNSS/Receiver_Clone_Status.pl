@@ -61,9 +61,14 @@ while ( $Working ) {
 	      print "Clone File Creation Completed\n"
 	   }
 	   else {
-	       print ".";
-	       $Count++; 
-	        }
+	       if ($Count) {
+		   print ".";
+	           }
+	       else {
+#                   print $State     
+	           }
+      	       $Count++; 
+	       }
 	}
 	else {
 		print "\nGet Failed with error code: "; 
