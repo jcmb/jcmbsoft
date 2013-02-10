@@ -127,6 +127,7 @@ class Dcol:
 
                             else:
 #                                print "Did get an invalid TrimComm checksum"
+#                               Scan for the next STX character since this packet is invalid
                                 self.undecoded.append(self.buffer[0]);
                                 del self.buffer[0];
                                 for i  in range (0,len(self.buffer)):
@@ -138,6 +139,7 @@ class Dcol:
                                         break;
                                 return Got_Undecoded
                         else:
+#                           Scan for the next STX character since this packet is invalid
                             self.undecoded.append(self.buffer[0]);
                             del self.buffer[0];
                             for i  in range (0,len(self.buffer)):
