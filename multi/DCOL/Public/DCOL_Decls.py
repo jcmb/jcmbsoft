@@ -58,6 +58,12 @@ GENOUT_TrimComm_Command    = 0x40; #GSOF}
 
 SETCOMMS_TrimComm_Command  = 0x48; #SETCOMMS}
 
+BreakRET_TrimComm_Command  = 0x6E;
+BreakReq_TrimComm_Command  = 0x6F;
+
+CMR_Type_TrimComm_Command  = 0x93;
+CMR_PLUS_TrimComm_Command  = 0x94;
+
 
 
 class Trimcomm_Command_Names:
@@ -73,6 +79,11 @@ class Trimcomm_Command_Names:
         self.Command_Names[GETSTAT1_TrimComm_Command]  = 'GetStat1';  #4000 RS-232 Manual
         self.Command_Names[RECSTAT1_TrimComm_Command]  = 'RecStat1';  #4000 RS-232 Manual
         self.Command_Names[SETCOMMS_TrimComm_Command]  = 'SetComms';  #4000 RS-232 Manual
+        self.Command_Names[BreakRET_TrimComm_Command]  = 'Break Ret'
+        self.Command_Names[BreakReq_TrimComm_Command]  = 'Break Req'
+        self.Command_Names[GENOUT_TrimComm_Command]    = 'GSOF'
+        self.Command_Names[CMR_Type_TrimComm_Command] = 'CMR'
+        self.Command_Names[CMR_PLUS_TrimComm_Command] = 'CMR+'
 
 
     def name (self,packet_ID):
@@ -84,5 +95,13 @@ class Trimcomm_Command_Names:
 
 Trimcomm_Names = Trimcomm_Command_Names()
 
+Zero_Length_Commands = set([
+    GETSERIAL_TrimComm_Command,
+    GETSTAT1_TrimComm_Command,
+    BreakReq_TrimComm_Command,
+    ]);
+
+
 
 from DCOL_Internal import *
+
