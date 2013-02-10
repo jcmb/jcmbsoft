@@ -41,7 +41,7 @@ class RetStat1 (DCOL.Dcol) :
         self.STATUS_OF_RECVR   = ''
         self.L2_CHANNELS_OPER  = 0
 
-    def decode(self,data):
+    def decode(self,data,internal=False):
 #        print "in restat decode, data length: " + str(len(data))
 #        print "data: " +hexlify(data);
 #        print TRetStat1_Pos_Type

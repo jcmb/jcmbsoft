@@ -60,7 +60,7 @@ GSOF_Message_Names=  ('Unknown',
     'Reserved 23',
     'Reserved 24',
     'Reserved 25',
-    'POSITION TIME UTC',
+    'POSITION TIME UTC (Obsolete)',
     'ATTITUDE INFO',
     'Reserved 28',
     'Reserved 29',
@@ -71,10 +71,10 @@ GSOF_Message_Names=  ('Unknown',
     'Detailed All Constellation SV Info',
     'Received Base Info',
     'Reserved 36',
-    'Reserved 37',
+    'Battery Memory Info',
     'Reserved 38',
     'Reserved 39',
-    'Reserved 40',
+    'LBAND STATUS INFO',
     'BASE POSITION AND QUALITY INDICATOR',
     'Reserved 42',
     'Reserved 43',
@@ -82,6 +82,20 @@ GSOF_Message_Names=  ('Unknown',
     'Reserved 45',
     'Reserved 46'
     );
+
+
+ATTITUDE_Calc_Mode_Names=(
+   'None',
+   'Autonomous',
+   'RTK/Float',
+   'RTK/Fix',
+   'DGPS')
+
+GNSS_System_Names=(
+   'GPS',
+   'SBAS',
+   'GLONASS',
+   'GALILEO')
 
 
 class GSOF (DCOL.Dcol) :
@@ -95,9 +109,12 @@ class GSOF (DCOL.Dcol) :
 
 
 
-    def decode(self,data):
+    def decode(self,data,internal=False):
         unpacked=unpack_from('> B B B',str(data))
+#        print " Buffer {:02X} {}".format(len(self.GSOF_Buffer),len(self.GSOF_Buffer))
+#        print " GSOF: " + hexlify(self.GSOF_Buffer)
         del data[0:3]
+#        print " PACKET: " + str(len(data)) + " " +hexlify(data)
         if unpacked[0] != self.seq_number:
             self.seq_number=unpacked[0]
             self.seen_pages=set([])
@@ -112,7 +129,6 @@ class GSOF (DCOL.Dcol) :
 
 #        print " Buffer {:02X} {}".format(len(self.GSOF_Buffer),len(self.GSOF_Buffer))
 #        print " GSOF: " + hexlify(self.GSOF_Buffer)
-#        print " PACKET: " + hexlify(data)
 
 
 #        print "last: {}  Max: {}  Seen: {}".format(self.last_page,self.max_page,len(self.seen_pages))
@@ -268,14 +284,63 @@ class GSOF (DCOL.Dcol) :
                                 self.SV_Detailed[SV]=unpacked
 #                                print unpacked
 
-#GSOF_RECEIVER_SERIAL_NUMBER = 15
-#GSOF_CURRENT_TIME_INFORMATION = 16
+                    elif subrecord == GSOF_RECEIVER_SERIAL_NUMBER :
+                        unpacked=unpack_from('>L',str(self.GSOF_Buffer))
+                        self.Serial_Number = unpacked[0]
 
-#GSOF_POSITION_TIME_UTC = 26
-#GSOF_ATTITUDE_INFO = 27
-#GSOF_BriefAllSVInfo = 33 #// * 33 Brief satellite information */
-#GSOF_DetailedAllSVInfo = 34 #// * 34 Detailed satellite information */
-#GSOF_ReceivedBaseInfo = 35 #// * 35 Received base information */
+                    elif subrecord == GSOF_CURRENT_TIME_INFORMATION :
+                        unpacked=unpack_from('>L H H B',str(self.GSOF_Buffer))
+                        self.Current_TIME = unpacked[0]
+                        self.Current_WEEK = unpacked[1]
+                        self.Current_UTC_OFFSET = unpacked[2]
+                        self.Current_Time_FLAGS = unpacked[3]
+
+                    elif subrecord == GSOF_POSITION_TIME_UTC :
+                        unpacked=unpack_from('>L H B B B',str(self.GSOF_Buffer))
+                        self.UTC_TIME = unpacked[0]
+                        self.UTC_WEEK = unpacked[1]
+                        self.UTC_Number_of_SVs = unpacked[2]
+                        self.UTC_FLAGS1 = unpacked[3]
+                        self.UTC_FLAGS2 = unpacked[4]
+                        self.UTC_Init_Counter = "N/A"
+
+                    elif subrecord == GSOF_ATTITUDE_INFO : # = 27
+                        unpacked=unpack_from('>L B B B B d d d d H f f f f',str(self.GSOF_Buffer))
+                        self.ATTITUDE_GPS_TIME = unpacked[0]
+                        self.ATTITUDE_Flags = unpacked[1]
+                        self.ATTITUDE_Num_SVs = unpacked[2]
+                        self.ATTITUDE_Calc_Mode = unpacked[3]
+                        self.ATTITUDE_Reserved = unpacked[4]
+                        self.ATTITUDE_Pitch = unpacked[5]
+                        self.ATTITUDE_Yaw = unpacked[6]
+                        self.ATTITUDE_Roll = unpacked[7]
+                        self.ATTITUDE_Range = unpacked[8]
+                        self.ATTITUDE_PDOP = float(unpacked[9])/10
+                        self.ATTITUDE_Pitch_Variance = unpacked[10]
+                        self.ATTITUDE_Yaw_Variance = unpacked[11]
+                        self.ATTITUDE_Roll_Variance = unpacked[12]
+                        self.ATTITUDE_Range_Variance = unpacked[13]
+
+
+                    elif subrecord == GSOF_BriefAllSVInfo:
+#                        print "GSOF Buffer Length Brief start : " + str(len(self.GSOF_Buffer))
+                        SV_Brief_Buffer=bytearray()
+                        SV_Brief_Buffer[:]=self.GSOF_Buffer #Force to get a copy not a reference
+#                        print "  {:02X}".format(len(SV_Brief_Buffer))
+#                        print hexlify(SV_Brief_Buffer)
+                        self.Brief_All_Num_SVs=SV_Brief_Buffer[0]
+                        del SV_Brief_Buffer[0]
+#                        print "***Num SV's: " + str(self.Brief_Num_SVs)
+                        self.SV_All_Brief={}
+                        if self.Brief_All_Num_SVs:
+                            for SV in range(0,self.Brief_All_Num_SVs):
+                                unpacked=unpack_from('>B B B B',str(SV_Brief_Buffer))
+                                del SV_Brief_Buffer[0:calcsize('>B B B B')]
+                                self.SV_All_Brief[SV]=unpacked
+#                                print "  {:02X}".format(len(SV_Brief_Buffer))
+#                                print hexlify(SV_Brief_Buffer)
+#                        print "GSOF Buffer Length brief end: " + str(len(self.GSOF_Buffer))
+
 
 
                     elif subrecord == GSOF_DetailedAllSVInfo:
@@ -294,6 +359,18 @@ class GSOF (DCOL.Dcol) :
                                 del SV_Detail_Buffer[0:calcsize('>B B B B b H B B B')]
                                 self.SV_Detailed_All[SV]=unpacked
 #                                print unpacked
+
+                    elif subrecord == GSOF_ReceivedBaseInfo : # 35 #// * 35 Received base information */
+                        unpacked=unpack_from('>B 8C H d d d',str(self.GSOF_Buffer))
+                        self.Received_Base_Flags=unpacked[0]
+                        self.Received_Base_Name=unpacked[1]
+                        self.Received_Base_ID=unpacked[2]
+                        self.Received_Base_Lat=unpacked[3]
+                        self.Received_Base_Long=unpacked[4]
+                        self.Received_Base_Height=unpacked[5]
+
+
+
 
 
                     elif subrecord == GSOF_Base_Position_Quaility :
@@ -328,8 +405,8 @@ class GSOF (DCOL.Dcol) :
     def dump(self,Dump_Level):
         if Dump_Level >= Dump_ID :
             for subrecord in self.seen_subrecords :
-                print " Subrecord: {}".format(subrecord);
-                print " Subrecord: {}".format(GSOF_Message_Names[subrecord]);
+#                print " Subrecord: {}".format(subrecord);
+                print " Subrecord: {:02} {}".format(subrecord,GSOF_Message_Names[subrecord]);
                 if Dump_Level >= Dump_Summary:
 
                     if subrecord == GSOF_POSITION_TIME :
@@ -497,6 +574,95 @@ class GSOF (DCOL.Dcol) :
                                         self.SV_Detailed[SV][2]
                                         )
 
+                    if subrecord == GSOF_RECEIVER_SERIAL_NUMBER :
+                        print "  Serial Number: {}".format(self.Serial_Number);
+
+                    elif subrecord == GSOF_CURRENT_TIME_INFORMATION :
+                        print "   Current {}:{:.3f}  OFFSET: {}  Time Valid: {}  Offset Valid: {}".format(
+                            self.Current_WEEK,
+                            float(self.Current_TIME)/1000,
+                            self.Current_UTC_OFFSET,
+                            self.Current_Time_FLAGS & Bit0 != 0,
+                            self.Current_Time_FLAGS & Bit1 != 0,
+                            )
+
+                    elif subrecord == GSOF_POSITION_TIME_UTC :
+                        print "   Current {}:{:.3f}  SV's: {}  Flags1: {:02X} Flags2: {:02X}  Init Counter: {}".format(
+                           self.UTC_WEEK,
+                           float(self.UTC_TIME)/1000,
+                           self.UTC_Number_of_SVs,
+                           self.UTC_FLAGS1,
+                           self.UTC_FLAGS2,
+                           self.UTC_Init_Counter);
+
+                    elif subrecord == GSOF_ATTITUDE_INFO : # = 27
+                        print "   Time: {:.3f}  SV's: {}  Flags: {:02X} Calc: {} PDOP: {:.1f}".format(
+                           float(self.ATTITUDE_GPS_TIME)/1000,
+                           self.ATTITUDE_Num_SVs,
+                           self.ATTITUDE_Flags,
+                           ATTITUDE_Calc_Mode_Names[self.ATTITUDE_Calc_Mode] if  self.ATTITUDE_Calc_Mode < len(ATTITUDE_Calc_Mode_Names) else "Unknown " + hex(self.ATTITUDE_Calc_Mode),
+                           self.ATTITUDE_Calc_Mode,
+                           self.ATTITUDE_PDOP)
+
+                        print "   Pitch: {:.3f}  Yaw: {:.3f}  Roll: {:.3f}  Range: {:.3f}".format(
+                           math.degrees(self.ATTITUDE_Pitch),
+                           math.degrees(self.ATTITUDE_Yaw),
+                           math.degrees(self.ATTITUDE_Roll),
+                           self.ATTITUDE_Range)
+
+                        if Dump_Level >= Dump_Full :
+                           print "   StdDev:: Pitch: {:.3f}  Yaw: {:.3f}  Roll: {:.3f}  Range: {:.3f}".format(
+                              math.degrees(math.sqrt(self.ATTITUDE_Pitch_Variance)),
+                              math.degrees(math.sqrt(self.ATTITUDE_Yaw_Variance)),
+                              math.degrees(math.sqrt(self.ATTITUDE_Roll_Variance)),
+                              math.sqrt(self.ATTITUDE_Range_Variance)
+                              )
+
+                           print "   Valid:: Pitch: {}  Yaw: {}  Roll: {}  Range: {}".format(
+                              self.ATTITUDE_Flags & Bit1 != 0,
+                              self.ATTITUDE_Flags & Bit2 != 0,
+                              self.ATTITUDE_Flags & Bit3 != 0,
+                              self.ATTITUDE_Flags & Bit4 != 0
+                              )
+
+                    if subrecord == GSOF_BriefAllSVInfo:
+                        print "  Number of SV's: " + str(self.Brief_All_Num_SVs)
+                        if Dump_Level == Dump_Full :
+                            for SV in range(0,self.Brief_All_Num_SVs):
+        #                                print "SV: " + str(SV)
+                                print "   SV: {:3}  System: {:7}  Flags1: {:02X} Flags2: {:02X}".format(
+                                        self.SV_All_Brief[SV][0],
+                                        GNSS_System_Names[self.SV_All_Brief[SV][1]] if self.SV_All_Brief[SV][1] < len(GNSS_System_Names) else "Unknown " + hex(self.SV_All_Brief[SV][1]),
+                                        self.SV_All_Brief[SV][2],
+                                        self.SV_All_Brief[SV][3]
+                                        )
+
+                        if Dump_Level >= Dump_Verbose :
+                            for SV in range(0,self.Brief_All_Num_SVs):
+        #                                print "SV: " + str(SV)
+                                print "   SV: {:3}  System: {:7}".format(
+                                    self.SV_All_Brief[SV][0],
+                                    GNSS_System_Names[self.SV_All_Brief[SV][1]] if self.SV_All_Brief[SV][1] < len(GNSS_System_Names) else "Unknown " + hex(self.SV_All_Brief[SV][1]),
+                                    )
+                                print "    Above: {}  Channel Assigned: {}  Tracking L1: {}  Tracking L2: {}  Base Tracking L1: {}  Base Tracking L2: {}  Used in position: {}  Used in RTK: {}".format(
+                                        self.SV_All_Brief[SV][2] & Bit0 != 0,
+                                        self.SV_All_Brief[SV][2] & Bit1 != 0,
+                                        self.SV_All_Brief[SV][2] & Bit2 != 0,
+                                        self.SV_All_Brief[SV][2] & Bit3 != 0,
+                                        self.SV_All_Brief[SV][2] & Bit4 != 0,
+                                        self.SV_All_Brief[SV][2] & Bit5 != 0,
+                                        self.SV_All_Brief[SV][2] & Bit6 != 0,
+                                        self.SV_All_Brief[SV][2] & Bit7 != 0,
+                                        )
+
+                                print "    Tracking L1 P: {}  Tracking L2 P: {}  Tracking L1 CS: {}".format(
+                                        self.SV_All_Brief[SV][3] & Bit0 != 0,
+                                        self.SV_All_Brief[SV][3] & Bit1 != 0,
+                                        self.SV_All_Brief[SV][3] & Bit2 != 0,
+                                        )
+
+
+
                     if subrecord == GSOF_DetailedAllSVInfo:
                         print "  Number of SV's: " + str(self.Detailed_All_Num_SVs)
                         if Dump_Level >= Dump_Full :
@@ -516,6 +682,17 @@ class GSOF (DCOL.Dcol) :
                                     self.SV_Detailed_All[SV][2],
                                     self.SV_Detailed_All[SV][3]
                                     )
+
+                    elif subrecord == GSOF_ReceivedBaseInfo : # 35 #// * 35 Received base information */
+                        print "  Valid: {}  NAme: {}  ID: {}",formar(
+                        self.Received_Base_Flags & Bit3 != 0,
+                        self.Received_Base_Name,
+                        self.Received_Base_ID);
+                        print "  Lat: {:.8f}  Long: {:.8f}  Height: {.3}".format(
+                        self.Received_Base_Lat,
+                        self.Received_Base_Long,
+                        self.Received_Base_Height)
+
 
 
                     if subrecord == GSOF_Base_Position_Quaility :

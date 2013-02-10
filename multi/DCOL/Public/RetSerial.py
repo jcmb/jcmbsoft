@@ -32,7 +32,7 @@ class RetSerial (DCOL.Dcol) :
 
 
 
-    def decode(self,data):
+    def decode(self,data,internal=False):
         unpacked = unpack('>8s 8s 5s 5s 5s 8s 2s 2s 2s 10s 31s 31s 31s H H B 5s',str(data))
         self.RECEIVER_SERIAL = unpacked[0]
         self.RECEIVER_TYPE   = unpacked[1]

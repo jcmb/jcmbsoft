@@ -37,7 +37,7 @@ class SetComms (DCOL.Dcol) :
         self.Modem_Init_Str = ""
 
 
-    def decode(self,data):
+    def decode(self,data,internal=False):
         if data[0] == 0xFF :
             self.Set_Type=1;
             del data[0]
