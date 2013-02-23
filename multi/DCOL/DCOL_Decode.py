@@ -12,12 +12,13 @@ import sys
 from datetime import datetime
 
 
-
-
 Dump_Undecoded = False
+Print_ACK_NAK  = False
 
 dcol=Dcol(internal=True,default_output_level=Dump_Verbose);
-dcol.Dump_Levels[GENOUT_TrimComm_Command]=Dump_None
+dcol.Dump_Levels[GENOUT_TrimComm_Command]=Dump_Full
+dcol.Dump_Levels[Get_Base_TrimComm_Command]=Dump_None
+
 
 #with open ('DCOL.bin','rb') as input_file:
 #   new_data = bytearray(input_file.read(255))
@@ -35,16 +36,18 @@ while (new_data):
     while result != 0 :
 #        print str(datetime.now())
         if result == Got_ACK :
-            print "ACK"
-            print ""
+            if Print_ACK_NAK:
+                print "ACK"
+                print ""
         elif result == Got_NACK :
-            print "NACK"
-            print ""
+            if Print_ACK_NAK:
+                print "NACK"
+                print ""
         elif result == Got_Undecoded :
             if Dump_Undecoded :
                 print "Undecoded Data: " +hexlify(dcol.undecoded);
         elif result == Got_Packet :
-            dcol.dump(dump_undecoded=True,dump_decoded=True);
+            dcol.dump(dump_undecoded=True,dump_decoded=False);
             sys.stdout.flush()
         elif result == Got_Sub_Packet:
             if dcol.Dump_Levels[dcol.packet_ID] :
