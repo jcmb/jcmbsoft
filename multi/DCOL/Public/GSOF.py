@@ -27,10 +27,12 @@ GSOF_CURRENT_TIME_INFORMATION = 16
 
 GSOF_POSITION_TIME_UTC = 26
 GSOF_ATTITUDE_INFO = 27
-GSOF_BriefAllSVInfo = 33 #// * 33 Brief satellite information */
-GSOF_DetailedAllSVInfo = 34 #// * 34 Detailed satellite information */
-GSOF_ReceivedBaseInfo = 35 #// * 35 Received base information */
-
+GSOF_BriefAllSVInfo = 33 # // * 33 Brief satellite information */
+GSOF_DetailedAllSVInfo = 34 # // * 34 Detailed satellite information */
+GSOF_ReceivedBaseInfo = 35 # // * 35 Received base information */
+GSOF_BatteryMemoryInfo = 37 # // * 37 Receiver remaining Battery and Memory info */
+GSOF_RtkErrorScale = 38
+GSOF_SV_Correction_Beam_Status_Info = 40 # // L Band Status Info
 GSOF_Base_Position_Quaility= 41;
 
 
@@ -72,7 +74,7 @@ GSOF_Message_Names=  ('Unknown',
     'Received Base Info',
     'Reserved 36',
     'Battery Memory Info',
-    'Reserved 38',
+    'Position Type Info',
     'Reserved 39',
     'LBAND STATUS INFO',
     'BASE POSITION AND QUALITY INDICATOR',
@@ -369,6 +371,43 @@ class GSOF (DCOL.Dcol) :
                         self.Received_Base_Long=unpacked[4]
                         self.Received_Base_Height=unpacked[5]
 
+                    elif subrecord == GSOF_BatteryMemoryInfo : # 37  Memory Battery */
+                        unpacked=unpack_from('>H d',str(self.GSOF_Buffer))
+                        self.Battery_Capacity=unpacked[0]
+                        self.Memory_Left=unpacked[1]
+
+                    elif subrecord == GSOF_RtkErrorScale:
+                        unpacked=unpack_from('>f B B f B',str(self.GSOF_Buffer))
+                        self.error_Scale=unpacked[0]
+                        self.solution_Flags=unpacked[1]
+                        self.RTK_Condition=unpacked[2]
+                        self.correction_Age=unpacked[3]
+                        self.network_Flags=unpacked[4]
+
+
+                    elif subrecord == GSOF_SV_Correction_Beam_Status_Info: # 40
+                        unpacked=unpack_from('>5s f H f B B B B B f f B f f L L L L L L B d',str(self.GSOF_Buffer))
+                        self.beam_info=unpacked
+                        self.beam_SV_Name=unpacked[0]
+                        self.beam_Freq=unpacked[1]
+                        self.beam_Rate=unpacked[2]
+                        self.beam_SNR=unpacked[3]
+                        self.beam_HP_XP_SUBSCRIBED_ENGINE=unpacked[4]
+                        self.beam_HP_XP_LIBRARY_MODE=unpacked[5]
+                        self.beam_VBS_LIBRARY_MODE=unpacked[6]
+                        self.beam_BEAM_MODE=unpacked[7]
+                        self.beam_OMNISTAR_MOTION=unpacked[8]
+                        self.beam_3_SIGMA_HORIZONTAL_PRECISION_THRESHOLD=unpacked[9]
+                        self.beam_3_SIGMA_VERTICAL_PRECISION_THRESHOLD=unpacked[10]
+                        self.beam_NMEA_ENCRYPTION_STATE=unpacked[11]
+                        self.beam_I_Q=unpacked[12]
+                        self.beam_Est_BER=unpacked[13]
+                        self.beam_Total_unique_messages=unpacked[14]
+                        self.beam_Total_unique_messages_with_errors=unpacked[15]
+                        self.beam_Total_Bad_unique_word_bits=unpacked[16]
+                        self.beam_Total_Viterbi_symbols=unpacked[17]
+                        self.beam_Corrected_Viterbi_symbols=unpacked[18]
+                        self.beam_Bad_Messages=unpacked[19]
 
 
 
@@ -694,8 +733,124 @@ class GSOF (DCOL.Dcol) :
                         self.Received_Base_Height)
 
 
+                    elif subrecord == GSOF_BatteryMemoryInfo : # 37 #// * 35 Memory Battery */
+                        print "  Battery: {}  Memory Left: {:.1}".format(
+                            self.Battery_Capacity,
+                            self.Memory_Left
+                            )
 
-                    if subrecord == GSOF_Base_Position_Quaility :
+                    elif subrecord == GSOF_RtkErrorScale:
+                        print "  Error Scale: {}  Correction Age: {}".format (
+                            self.error_Scale,
+                            self.correction_Age
+                            )
+                        print "  Wide Area: {}  Fixed: {}".format (
+                            (self.solution_Flags and Bit0) != 0,
+                            (self.solution_Flags and Bit1) != 0
+                            )
+
+                        print "  xFill: {}  RTX: {}  RTX Link Down: : {} ".format (
+                            (self.network_Flags and Bit5) != 0,
+                            (self.network_Flags and Bit6) != 0,
+                            (self.network_Flags and Bit7) != 0
+                            )
+
+                        print "  New Base: {}  Outside GeoFence: {}  Outside Range Limit: {} ".format (
+                            (self.network_Flags and Bit0) != 0,
+                            (self.network_Flags and Bit3) != 0,
+                            (self.network_Flags and Bit4) != 0
+                            )
+
+
+
+
+                    elif subrecord == GSOF_SV_Correction_Beam_Status_Info: # 40
+                        if Dump_Level >= Dump_Summary :
+                            print "  SV Name: {}  Freq: {:0.3f}  Bit Rate: {} C/No [dBHz]: {:0.2f}  I/Q ratio: {:.5f}".format (
+                                self.beam_SV_Name,
+                                self.beam_Freq,
+                                self.beam_Rate,
+                                self.beam_SNR,
+                                self.beam_I_Q
+                                )
+
+                        if Dump_Level >= Dump_Full :
+
+                            Subscribed_Engine = "Unknown Mode"
+
+                            if self.beam_HP_XP_SUBSCRIBED_ENGINE == 0 :
+                                Subscribed_Engine = "XP"
+                            elif self.beam_HP_XP_SUBSCRIBED_ENGINE == 1 :
+                                Subscribed_Engine = "HP"
+                            elif self.beam_HP_XP_SUBSCRIBED_ENGINE == 2 :
+                                Subscribed_Engine = "HP"
+                            elif self.beam_HP_XP_SUBSCRIBED_ENGINE == 3 :
+                                Subscribed_Engine = "HP"
+                            elif self.beam_HP_XP_SUBSCRIBED_ENGINE == 4 :
+                                Subscribed_Engine = "HP"
+                            elif self.beam_HP_XP_SUBSCRIBED_ENGINE == 255 :
+                                Subscribed_Engine = "Unknown"
+
+                            Beam_Mode = "Unknown Mode"
+
+                            if self.beam_BEAM_MODE == 0 :
+                                Beam_Mode = "Off"
+                            elif self.beam_BEAM_MODE == 1 :
+                                Beam_Mode = "FFT Init"
+                            elif self.beam_BEAM_MODE == 2 :
+                                Beam_Mode = "FFT Running"
+                            elif self.beam_BEAM_MODE == 3 :
+                                Beam_Mode = "Search Init"
+                            elif self.beam_BEAM_MODE == 4 :
+                                Beam_Mode = "Search Running"
+                            elif self.beam_BEAM_MODE == 5 :
+                                Beam_Mode = "Track Init"
+                            elif self.beam_BEAM_MODE == 6 :
+                                Beam_Mode = "Track Searching"
+                            elif self.beam_BEAM_MODE == 7 :
+                                Beam_Mode = "Tracking"
+
+
+                            OmniStar_Motion = "Unknown Mode"
+
+                            if self.beam_OMNISTAR_MOTION == 0 :
+                                OmniStar_Motion = "Kinematic"
+                            elif self.beam_OMNISTAR_MOTION == 1 :
+                                OmniStar_Motion = "Static"
+                            elif self.beam_OMNISTAR_MOTION == 2 :
+                                OmniStar_Motion = "Not Ready"
+                            elif self.beam_OMNISTAR_MOTION == 255 :
+                                OmniStar_Motion = "Unknown"
+
+                            print "  Beam: {}  Subscribed: {}  HP/XP Active: {}  VBS Active: {}  Motion: {}".format(
+                                Beam_Mode,
+                                Subscribed_Engine,
+                                self.beam_HP_XP_LIBRARY_MODE != 0,
+                                self.beam_VBS_LIBRARY_MODE!=0,
+                                OmniStar_Motion
+                                )
+
+                        if Dump_Level >= Dump_Verbose :
+                            print "  Total Messages: {}  Messages with Errors: {}  Bad Messages: {}  Bad unique word bits: {}".format (
+                                self.beam_Total_unique_messages,
+                                self.beam_Total_unique_messages_with_errors,
+                                self.beam_Bad_Messages,
+                                self.beam_Total_Bad_unique_word_bits,
+                                )
+
+                            print "  Estimated BER: {} Total Viterbi symbols: {} Corrected Viterbi symbols: {}".format (
+                                self.beam_Est_BER,
+                                self.beam_Total_Viterbi_symbols,
+                                self.beam_Corrected_Viterbi_symbols,
+                                )
+
+#                            self.beam_3-SIGMA_HORIZONTAL_PRECISION_THRESHOLD=unpacked[9]
+#                            self.beam_3-SIGMA_VERTICAL_PRECISION_THRESHOLD=unpacked[10]
+#                            self.beam_NMEA_ENCRYPTION_STATE=unpacked[11]
+
+
+
+                    elif subrecord == GSOF_Base_Position_Quaility :
                         print"  Time: {}:{:.2f}  Lat: {:0.8f}  Long: {:0.8f}  Height: {:0.3f}  Quaility {}".format(
                         self.Base_GPS_Week,
                         float(self.Base_GPS_Time,)/1000,
