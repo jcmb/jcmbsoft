@@ -39,6 +39,7 @@ class Dcol:
         self.last_packet_valid=False
         self.packet_ID=-1
         self.Handlers={}
+        self.Status_Byte=0
         for B in range(0,256) :
            self.Handlers[B]=None
 
@@ -108,6 +109,7 @@ class Dcol:
 #                                print "Did get a valid TrimComm packet"
 #                                 Decode_Status_Byte;
                                 self.packet_ID = self.buffer[Trimcomm_Type_Location];
+                                self.Status_Byte=self.buffer[TrimComm_Status_Byte_Location]
                                 self.last_packet_valid = True;
                                 self.packet = self.buffer[0:packet_length + TrimComm_End_Location+1];
                                 if (packet_length != 0) :
@@ -185,10 +187,33 @@ class Dcol:
             self._add_Handler(OmniStar_TrimComm_Command,OmniSTAR.OmniSTAR());
             self._add_Handler(Funnel_TrimComm_Command,Funnel.Funnel(internal));
             self._add_Handler(Radio_Pipe_TrimComm_Command,RadioPipe.RadioPipe());
+            self._add_Handler(Get_Base_TrimComm_Command,GetBase.GetBase());
+            self._add_Handler(Ret_Base_TrimComm_Command,RetBase.RetBase());
 
-    def dump (self,dump_undecoded=False,dump_decoded=False):
+
+
+    def dump (self,dump_undecoded=False,dump_decoded=False,dump_status=False):
         if self.Dump_Levels[self.packet_ID] :
             print self.name() + ' ( ' +  hex(self.packet_ID) +" ) : "
+
+            if dump_status:
+                if (self.Dump_Levels[self.packet_ID] > Dump_ID) and (not (self.packet_ID in Non_Reply_Commands)) :
+                    print " Status Byte: :{:02X} ".format (
+                        self.Status_Byte
+                        )
+                    print "  Low Battery: {}  Low Memory: {}  Roving: {}".format (
+                        (self.Status_Byte & Bit1 <> 0),
+                        (self.Status_Byte & Bit0 <> 0),
+                        (self.Status_Byte & Bit3 <> 0)
+                        )
+
+                    print "  Synced: {}  Inited: {}  Inited: {}".format (
+                        (self.Status_Byte & Bit6 <> 0),
+                        (self.Status_Byte & Bit5 <> 0),
+                        (self.Status_Byte & Bit7 <> 0)
+                        )
+                    print ""
+
 
             if self.packet_ID in Zero_Length_Commands :
                 print " No Extra Information in Command, as expected"
@@ -199,12 +224,12 @@ class Dcol:
                     self.Handlers[self.packet_ID].dump(self.Dump_Levels[self.packet_ID]);
                     if dump_decoded :
                         print " Packet Data: " + ByteToHex (self.packet)
-                        print ""
+                    print ""
                 else :
                     print " Dont have a decoder for packet: " + hex (self.packet_ID)
                     if dump_undecoded :
                         print " Packet Data: " + ByteToHex (self.packet)
-                        print ""
+                    print ""
 
 
 import RetStat1
@@ -217,3 +242,5 @@ import Funnel;
 import RadioPipe
 import GSOF
 import CMR
+import GetBase
+import RetBase
