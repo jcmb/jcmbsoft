@@ -101,6 +101,16 @@ Zero_Length_Commands = set([
     BreakReq_TrimComm_Command,
     ]);
 
+#Request Commands we don't display the status byte for
+
+Non_Reply_Commands = set ([
+    GETSERIAL_TrimComm_Command,
+    GETSTAT1_TrimComm_Command,
+    SETCOMMS_TrimComm_Command,
+    BreakReq_TrimComm_Command,
+    CMR_Type_TrimComm_Command,
+    CMR_PLUS_TrimComm_Command
+    ])
 
 
 from DCOL_Internal import *
