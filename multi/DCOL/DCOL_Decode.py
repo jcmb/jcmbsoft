@@ -4,6 +4,9 @@ import sys
 
 sys.path.append("Public"); # Gave up trying to work how to do this with a .pth file or using .
 sys.path.append("../../../Internal");
+sys.path.append("/Users/gkirk/Dropbox/git/jcmbsoft/multi/DCOL/")
+sys.path.append("/Users/gkirk/Dropbox/git/jcmbsoft/multi/DCOL/Public")
+sys.path.append("/Users/gkirk/Dropbox/git/internal")
 
 from DCOL import *
 from DCOL_Decls import *
@@ -31,7 +34,7 @@ while (new_data):
 #    if len(dcol.buffer):
 #        print str(len(dcol.buffer)) + ' ' + hex(dcol.buffer[len(dcol.buffer)-1])
 #        sys.stdout.flush()
-    result = dcol.process_data ()
+    result = dcol.process_data (dump_decoded=False)
 
     while result != 0 :
 #        print str(datetime.now())
