@@ -363,13 +363,13 @@ class GSOF (DCOL.Dcol) :
 #                                print unpacked
 
                     elif subrecord == GSOF_ReceivedBaseInfo : # 35 #// * 35 Received base information */
-                        unpacked=unpack_from('>B 8C H d d d',str(self.GSOF_Buffer))
+                        unpacked=unpack_from('>B 8s H d d d',str(self.GSOF_Buffer))
                         self.Received_Base_Flags=unpacked[0]
                         self.Received_Base_Name=unpacked[1]
                         self.Received_Base_ID=unpacked[2]
-                        self.Received_Base_Lat=unpacked[3]
-                        self.Received_Base_Long=unpacked[4]
-                        self.Received_Base_Height=unpacked[5]
+                        self.Received_Base_Lat=float(unpacked[3])
+                        self.Received_Base_Long=float(unpacked[4])
+                        self.Received_Base_Height=float(unpacked[5])
 
                     elif subrecord == GSOF_BatteryMemoryInfo : # 37  Memory Battery */
                         unpacked=unpack_from('>H d',str(self.GSOF_Buffer))
@@ -723,14 +723,14 @@ class GSOF (DCOL.Dcol) :
                                     )
 
                     elif subrecord == GSOF_ReceivedBaseInfo : # 35 #// * 35 Received base information */
-                        print "  Valid: {}  NAme: {}  ID: {}",formar(
-                        self.Received_Base_Flags & Bit3 != 0,
-                        self.Received_Base_Name,
-                        self.Received_Base_ID);
-                        print "  Lat: {:.8f}  Long: {:.8f}  Height: {.3}".format(
-                        self.Received_Base_Lat,
-                        self.Received_Base_Long,
-                        self.Received_Base_Height)
+                        print "  Valid: {}  Name: {}  ID: {}".format(
+                            self.Received_Base_Flags & Bit3 != 0,
+                            self.Received_Base_Name,
+                            self.Received_Base_ID);
+                        print "  Lat: {:0.8f}  Long: {:0.8f}  Height: {:0.3f}".format(
+                            math.degrees(self.Received_Base_Lat),
+                            math.degrees(self.Received_Base_Long),
+                            self.Received_Base_Height)
 
 
                     elif subrecord == GSOF_BatteryMemoryInfo : # 37 #// * 35 Memory Battery */
@@ -851,7 +851,7 @@ class GSOF (DCOL.Dcol) :
 
 
                     elif subrecord == GSOF_Base_Position_Quaility :
-                        print"  Time: {}:{:.2f}  Lat: {:0.8f}  Long: {:0.8f}  Height: {:0.3f}  Quaility {}".format(
+                        print"  Time: {}:{:.2f}  Lat: {:0.8f}  Long: {:0.8f}  Height: {:0.3f}  Quaility: {}".format(
                         self.Base_GPS_Week,
                         float(self.Base_GPS_Time,)/1000,
                         math.degrees(self.Base_Lat),
