@@ -57,7 +57,7 @@ class Dcol:
 
 
 
-    def process_data (self):
+    def process_data (self, dump_decoded=False):
 #        print len (self.buffer)
         self.packet_ID = 0;
 
@@ -118,6 +118,10 @@ class Dcol:
                                     self.data = bytearray("");
 
                                 del self.buffer[0:packet_length + TrimComm_End_Location+1]
+
+                                if dump_decoded :
+                                    print "Packet Data: " + ByteToHex (self.packet)
+
                                 if self.Handlers[self.packet_ID] :
  #                                   print "have a handler for packet: " + hex (self.packet_ID)
 #                                    print "packet: " + str(len(self.packet)) + " " + hexlify(self.packet)
@@ -192,7 +196,7 @@ class Dcol:
 
 
 
-    def dump (self,dump_undecoded=False,dump_decoded=False,dump_status=False):
+    def dump (self,dump_undecoded=False,dump_status=False,dump_decoded=False):
         if self.Dump_Levels[self.packet_ID] :
             print self.name() + ' ( ' +  hex(self.packet_ID) +" ) : "
 
@@ -221,9 +225,10 @@ class Dcol:
             else:
                 if self.Handlers[self.packet_ID] :
     #                print "dump have a handler for packet: " + hex (self.packet_ID)
-                    self.Handlers[self.packet_ID].dump(self.Dump_Levels[self.packet_ID]);
                     if dump_decoded :
                         print " Packet Data: " + ByteToHex (self.packet)
+                    self.Handlers[self.packet_ID].dump(self.Dump_Levels[self.packet_ID]);
+
                     print ""
                 else :
                     print " Dont have a decoder for packet: " + hex (self.packet_ID)
