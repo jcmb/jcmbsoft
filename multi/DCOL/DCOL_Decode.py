@@ -7,6 +7,7 @@ sys.path.append("../../../Internal");
 sys.path.append("/Users/gkirk/Dropbox/git/jcmbsoft/multi/DCOL/")
 sys.path.append("/Users/gkirk/Dropbox/git/jcmbsoft/multi/DCOL/Public")
 sys.path.append("/Users/gkirk/Dropbox/git/internal")
+sys.path.append("internal_stubs");
 
 from DCOL import *
 from DCOL_Decls import *
@@ -18,7 +19,7 @@ from datetime import datetime
 Dump_Undecoded = False
 Print_ACK_NAK  = False
 
-dcol=Dcol(internal=True,default_output_level=Dump_Verbose);
+dcol=Dcol(internal=False,default_output_level=Dump_Verbose);
 dcol.Dump_Levels[GENOUT_TrimComm_Command]=Dump_Full
 dcol.Dump_Levels[Get_Base_TrimComm_Command]=Dump_None
 
