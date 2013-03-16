@@ -1,27 +1,115 @@
 #!/usr/bin/env python
 
 import sys
+import argparse
+import pprint
+
 
 sys.path.append("Public"); # Gave up trying to work how to do this with a .pth file or using .
-sys.path.append("../../../Internal");
 sys.path.append("/Users/gkirk/Dropbox/git/jcmbsoft/multi/DCOL/")
 sys.path.append("/Users/gkirk/Dropbox/git/jcmbsoft/multi/DCOL/Public")
 sys.path.append("/Users/gkirk/Dropbox/git/internal")
+sys.path.append("internal");
 sys.path.append("internal_stubs");
 
 from DCOL import *
 from DCOL_Decls import *
-from binascii import hexlify
 import sys
 from datetime import datetime
 
 
-Dump_Undecoded = False
-Print_ACK_NAK  = False
+def ByteToHex( byteStr ):
+    """
+    Convert a byte string to it's hex string representation e.g. for output.
+    """
 
-dcol=Dcol(internal=False,default_output_level=Dump_Verbose);
-dcol.Dump_Levels[GENOUT_TrimComm_Command]=Dump_Full
-dcol.Dump_Levels[Get_Base_TrimComm_Command]=Dump_None
+    hex = []
+    for aChar in byteStr:
+        hex.append( "%02X " % aChar )
+
+    return ''.join( hex ).strip()
+
+
+class ArgParser(argparse.ArgumentParser):
+
+    def convert_arg_line_to_args(self, arg_line):
+        for arg in arg_line.split():
+            if not arg.strip():
+                continue
+            yield arg
+
+
+parser = ArgParser(
+            description='Trimble Data Collector (DCOL) packet decoder',
+            fromfile_prefix_chars='@',
+            epilog="(c) JCMBsoft 2013")
+
+parser.add_argument("-A", "--ACK", action="store_true", help="Displays ACK/NACK replies")
+parser.add_argument("-U", "--Undecoded", action="store_true", help="Displays Undecoded Packets")
+parser.add_argument("-D", "--Decoded", action="store_true", help="Displays Decoded Packets")
+parser.add_argument("-T", "--Trimble", action="store_true", help="Use internal decoders, which must be available.")
+parser.add_argument("-L", "--Level", type=int, help="Output level, how much detail will be displayed. Default=2", default=2, choices=[0,1,2,3,4])
+parser.add_argument("-N", "--None", nargs='+', help="Packets that should not be dumped")
+parser.add_argument("-I", "--ID", nargs='+', help="Packets that should have there ID dumped only")
+parser.add_argument("-S", "--Summary", nargs='+', help="Packets that should have a Summary dumped")
+parser.add_argument("-F", "--Full", nargs='+', help="Packets that should be dumped Fully")
+parser.add_argument("-V", "--Verbose", nargs='+', help="Packets that should be dumped Verbosely")
+parser.add_argument("-E", "--Explain", action="store_true", help="System Should Explain what is is doing, AKA Verbose")
+
+args=parser.parse_args()
+
+#print args
+
+Dump_Undecoded = args.Undecoded
+Dump_Decoded = args.Decoded
+Print_ACK_NAK  = args.ACK
+
+if args.Explain:
+    print "Dump undecoded: {}  Dump Decoded: {}  Dump ACK/NACK: {}".format(
+        Dump_Undecoded,
+        Dump_Decoded,
+        Print_ACK_NAK)
+
+
+
+dcol=Dcol(internal=args.Trimble,default_output_level=args.Level);
+
+if args.Explain:
+        print "Default Output Level: "  + str(args.Level)
+
+if args.None:
+    for id in args.None:
+        if args.Explain:
+            print "Decode Level None: " + hex(int(id,0))
+        dcol.Dump_Levels[int(id,0)]=Dump_None
+
+if args.ID:
+    for id in args.ID:
+        if args.Explain:
+            print "Decode Level ID: " + hex(int(id,0))
+        dcol.Dump_Levels[int(id,0)]=Dump_ID
+
+if args.Summary:
+    for id in args.Summary:
+        if args.Explain:
+            print "Decode Level Summary: " + hex(int(id,0))
+        dcol.Dump_Levels[int(id,0)]=Dump_Summary
+
+if args.Full:
+    for id in args.Full:
+        if args.Explain:
+            print "Decode Level Full: " + hex(int(id,0))
+        dcol.Dump_Levels[int(id,0)]=Dump_Full
+
+if args.Verbose:
+    for id in args.Verbose:
+        if args.Explain:
+            print "Decode Level Verbose: " + hex(int(id,0))
+
+        dcol.Dump_Levels[int(id,0)]=Dump_Verbose
+
+#dcol.Dump_Levels[GENOUT_TrimComm_Command]=Dump_Full
+#dcol.Dump_Levels[Get_Base_TrimComm_Command]=Dump_None
 
 
 #with open ('DCOL.bin','rb') as input_file:
@@ -49,9 +137,9 @@ while (new_data):
                 print ""
         elif result == Got_Undecoded :
             if Dump_Undecoded :
-                print "Undecoded Data: " +hexlify(dcol.undecoded);
+                print "Undecoded Data: " +ByteToHex(dcol.undecoded);
         elif result == Got_Packet :
-            dcol.dump(dump_undecoded=True,dump_decoded=False);
+            dcol.dump(dump_undecoded=Dump_Undecoded,dump_decoded=Dump_Decoded);
             sys.stdout.flush()
         elif result == Got_Sub_Packet:
             if dcol.Dump_Levels[dcol.packet_ID] :
