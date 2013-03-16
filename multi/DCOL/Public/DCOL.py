@@ -184,6 +184,7 @@ class Dcol:
         self._add_Handler(SETCOMMS_TrimComm_Command,SetComms.SetComms());
         self._add_Handler(GENOUT_TrimComm_Command,GSOF.GSOF());
         self._add_Handler(CMR_Type_TrimComm_Command,CMR.CMR());
+        self._add_Handler(BreakRET_TrimComm_Command,RetBreak.RetBreak());
 
         if internal :
             self._add_Handler(RTKSTAT_TrimComm_Command,RTKStat.RTKStat());
@@ -193,6 +194,7 @@ class Dcol:
             self._add_Handler(Radio_Pipe_TrimComm_Command,RadioPipe.RadioPipe());
             self._add_Handler(Get_Base_TrimComm_Command,GetBase.GetBase());
             self._add_Handler(Ret_Base_TrimComm_Command,RetBase.RetBase());
+            self._add_Handler(RETOPT_TrimComm_Command,RetOpt.RetOpt());
 
 
 
@@ -249,3 +251,5 @@ import GSOF
 import CMR
 import GetBase
 import RetBase
+import RetOpt
+import RetBreak
