@@ -1,0 +1,28 @@
+#! /bin/bash
+cat <<HEAD
+Content-type: text/html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="utf-8" />
+   <title>Trimble Antenna.Ini Viewer</title>
+   <meta name="generator" content="BBEdit 10.5" />
+</head>
+<body>
+<form action="display_group" method="GET">
+HEAD
+./antenna.ini.py --groups --html
+cat <<EOF1
+<br/>
+<button type="submit">Display antennas</button>
+</form>
+EOF1
+
+echo "<p/>"
+./antenna.ini.py --version --html
+
+cat <<EOF2
+</body>
+</html>
+EOF2
