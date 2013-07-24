@@ -1,0 +1,25 @@
+#! /bin/bash
+cat <<HEAD
+Content-type: text/html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="utf-8" />
+   <title>Trimble Antenna.ini Group Viewer</title>
+   <meta name="generator" content="BBEdit 10.5" />
+</head>
+<body>
+<form action="display_antenna" method="GET">
+HEAD
+
+group=`echo "$QUERY_STRING" | sed -n 's/^.*group=\([^&]*\).*$/\1/p' | sed "s/%20/ /g"| sed "s/%2F/\//g"`
+
+./antenna.ini.py --html --group "$group"
+cat <<EOF1
+<br/>
+<button type="submit">Display antenna</button>
+</form>
+</body>
+</html>
+EOF1
