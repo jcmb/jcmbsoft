@@ -54,6 +54,11 @@ RETSERIAL_TrimComm_Command = 0x07; #Receiver & Antenna Serial Numbers}
 GETSTAT1_TrimComm_Command  = 0x08;
 RECSTAT1_TrimComm_Command  = 0x09;
 
+GETTIME_TrimComm_Command   = 0x14;
+RETTIME_TrimComm_Command   = 0x15;
+
+SETANT_TrimComm_Command = 0x1B
+
 GENOUT_TrimComm_Command    = 0x40; #GSOF}
 
 SETCOMMS_TrimComm_Command  = 0x48; #SETCOMMS}
@@ -73,7 +78,9 @@ class Trimcomm_Command_Names:
         for B in range(0,256) :
            self.Command_Names[B] ='Unknown packet ID: ' + hex(B);
 
-
+        self.Command_Names[GETTIME_TrimComm_Command] = 'GetTime' #4000 Manual
+        self.Command_Names[RETTIME_TrimComm_Command] = 'RetTime' #4000 Manual
+        self.Command_Names[SETANT_TrimComm_Command]  = 'SetAnt'; #4000 Manual
         self.Command_Names[GETSERIAL_TrimComm_Command] = 'GetSerial'; #BD970 manual
         self.Command_Names[RETSERIAL_TrimComm_Command] = 'RetSerial'; #BD970 manual
         self.Command_Names[GETSTAT1_TrimComm_Command]  = 'GetStat1';  #4000 RS-232 Manual
