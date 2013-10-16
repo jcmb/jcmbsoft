@@ -1,3 +1,18 @@
+"""
+DCOL:
+
+This object provides the core decoding and dispatch of DCOL packets. 
+
+It does support the 2 byte length packets, if they are known to the system.
+
+To add a new packet decoder you need to 
+
+1: Add a line in add_handlers to call the new decoder for that packet type.
+2: Add an import at the bottom of the file for the file that has the decoder
+3: If the decoder is an internal one then make one in internal_stub which just contains a pass
+
+""" 
+
 from binascii import hexlify
 from DCOL_Decls import *
 
@@ -40,6 +55,8 @@ class Dcol:
         self.packet_ID=-1
         self.Handlers={}
         self.Status_Byte=0
+        self.Long_Packet=False
+
         for B in range(0,256) :
            self.Handlers[B]=None
 
@@ -51,6 +68,7 @@ class Dcol:
 
 
     def add_data (self,data):
+    # Add more received data into the system. Adding data does not mean that we will try and decode it.
         self.buffer+=data
 #        print len(self.buffer)
 #       print hexlify(self.buffer)
@@ -58,6 +76,25 @@ class Dcol:
 
 
     def process_data (self, dump_decoded=False):
+    # Process the data in the buffer, will return
+    # Got_ACK
+    # Got_NACK
+    # Got_Undecoded. Got data that is known to be invalid
+    # Got_Packet. Got a valid packet. Will be output to STDOUT if dump_decoded=True
+    # Need More. Have the start of a DCOL packet but have not got enough data to finish it
+
+        """        
+        Note that the Length is not protected by a checksum so it is possible when there is invalid data that the decoder will get an invalid length
+        this will cause the decoder to stall until length bytes have been received. Since the system will be waiting for that full packet. 
+        
+        With the new 2 byte packet support this could take upto 64K of data. Once the amount of data comes in the system will clear the backlog, 
+        if called correctly.
+   
+        You MUST continue to call process_data until it returns Need_More.
+        
+        The decoder is a reasonably standard decoder, it is designed to be simple not super fast
+   
+        """    
 #        print len (self.buffer)
         self.packet_ID = 0;
 
@@ -88,21 +125,51 @@ class Dcol:
             else :
 #                print "Did get a 2"
                 if len (self.buffer) >= TrimComm_Min_Size :
+#                    print "Buffer: " + ByteToHex(self.buffer);
+
                     packet_length=self.buffer[TrimComm_Length_Location];
-                    if len (self.buffer) >= (packet_length + TrimComm_Min_Size) :
+                    self.packet_ID = self.buffer[Trimcomm_Type_Location];
+                    
+                    if (self.packet_ID == 0x95) or (self.packet_ID == 0x96) or (self.packet_ID == 0xC2): # The Horrible 2 byte packets.
+# Two byte length packets
+                       """
+                       There are some packets that have a 2 byte length instead of using multi packets (which are also horrid)
+                       When one of the packet_ID that is a known 2 byte packet is detected the packet_length, the packet length is
+                       computed using the 2 bytes of length. 
+                       
+                       Long_Packet_Adjustment 0 unless it is a long packet then it is 1
+                       
+                       Long_Packet_Adjustment is used to avoid having if statements, it is used to allow for the fact that everything after
+                       the length byte is offset by 1 Byte.  Normally needs to be used in anything accessing the buffer.
+                       
+                       Next time I add another 2 byte command I need to make it defined set since this is really tacky
+                       
+                       """ 
+                       packet_length=packet_length*256
+                       packet_length+=self.buffer[TrimComm_Length_Location+1]
+#                       print "Long Packet:: id: {:X} Length: {:X} Buffer: {:X}".format(self.packet_ID,packet_length,len(self.buffer))
+                       self.Long_Packet=True
+                       Long_Packet_Adjustment=1
+                    else :
+#                       print "Normal Packet:: id: {:X} Length: {:X} Buffer: {:X}".format(self.packet_ID,packet_length,len(self.buffer))
+                       self.Long_Packet=False
+                       Long_Packet_Adjustment=0
+
+
+                    if len (self.buffer) >= (packet_length + TrimComm_Min_Size+Long_Packet_Adjustment) :
 #                        print "Have a STX with enough data in the buffer for the packet"
-                        if (self.buffer[packet_length + TrimComm_End_Location] == TrimComm_End) :
+                        if (self.buffer[packet_length + TrimComm_End_Location+Long_Packet_Adjustment] == TrimComm_End) :
 #                            print "have valid end of packet"
                             Checksum = 0;
 #                            print TrimComm_First_Checksum_Location,packet_length + TrimComm_Checksum_Location;
-                            for i  in range (TrimComm_First_Checksum_Location,packet_length + TrimComm_Checksum_Location):
+                            for i  in range (TrimComm_First_Checksum_Location,packet_length + TrimComm_Checksum_Location+Long_Packet_Adjustment):
                                  Checksum += self.buffer[i];
 #                                 print "i: " + str(i) + " " + hex(self.buffer[i]) + " " + str(Checksum);
 
                             Checksum = Checksum % 256
 #                            print "Checksum: " + hex(Checksum)
 
-                            Checksum_In_Packet = self.buffer[packet_length + TrimComm_Checksum_Location];
+                            Checksum_In_Packet = self.buffer[packet_length + TrimComm_Checksum_Location+Long_Packet_Adjustment];
 #                            print "Expected: " + hex(Checksum_In_Packet)
 
                             if (Checksum == Checksum_In_Packet) :
@@ -111,19 +178,19 @@ class Dcol:
                                 self.packet_ID = self.buffer[Trimcomm_Type_Location];
                                 self.Status_Byte=self.buffer[TrimComm_Status_Byte_Location]
                                 self.last_packet_valid = True;
-                                self.packet = self.buffer[0:packet_length + TrimComm_End_Location+1];
+                                self.packet = self.buffer[0:packet_length + TrimComm_End_Location+1+Long_Packet_Adjustment];
                                 if (packet_length != 0) :
-                                    self.data = self.buffer [TrimComm_First_Data_Location : TrimComm_First_Data_Location + packet_length]
+                                    self.data = self.buffer [TrimComm_First_Data_Location +Long_Packet_Adjustment : TrimComm_First_Data_Location + packet_length]
                                 else :
                                     self.data = bytearray("");
 
-                                del self.buffer[0:packet_length + TrimComm_End_Location+1]
+                                del self.buffer[0:packet_length + TrimComm_End_Location+1+Long_Packet_Adjustment]
 
                                 if dump_decoded :
                                     print "Packet Data: " + ByteToHex (self.packet)
 
                                 if self.Handlers[self.packet_ID] :
- #                                   print "have a handler for packet: " + hex (self.packet_ID)
+#                                    print "have a handler for packet: " + hex (self.packet_ID)
 #                                    print "packet: " + str(len(self.packet)) + " " + hexlify(self.packet)
                                     Result = self.Handlers[self.packet_ID].decode(self.data,self.internal);
                                     return Result;
@@ -179,6 +246,10 @@ class Dcol:
         pass
 
     def add_handlers (self,internal):
+        self._add_Handler(SETANT_TrimComm_Command,SetAnt.SetAnt());
+        self._add_Handler(GETTIME_TrimComm_Command, GetTime.GetTime()) #4000 Manual
+        self._add_Handler(RETTIME_TrimComm_Command, RetTime.RetTime()) #4000 Manual
+
         self._add_Handler(RECSTAT1_TrimComm_Command,RetStat1.RetStat1());
         self._add_Handler(RETSERIAL_TrimComm_Command,RetSerial.RetSerial());
         self._add_Handler(SETCOMMS_TrimComm_Command,SetComms.SetComms());
@@ -187,6 +258,8 @@ class Dcol:
         self._add_Handler(BreakRET_TrimComm_Command,RetBreak.RetBreak());
 
         if internal :
+
+            self._add_Handler(Station_TrimComm_Command,Station.Station());
             self._add_Handler(RTKSTAT_TrimComm_Command,RTKStat.RTKStat());
             self._add_Handler(RETRTKSTAT_TrimComm_Command,RetRTKStat.RetRTKStat());
             self._add_Handler(OmniStar_TrimComm_Command,OmniSTAR.OmniSTAR());
@@ -194,7 +267,12 @@ class Dcol:
             self._add_Handler(Radio_Pipe_TrimComm_Command,RadioPipe.RadioPipe());
             self._add_Handler(Get_Base_TrimComm_Command,GetBase.GetBase());
             self._add_Handler(Ret_Base_TrimComm_Command,RetBase.RetBase());
+            self._add_Handler(GETOPT_TrimComm_Command,GetOpt.GetOpt());
             self._add_Handler(RETOPT_TrimComm_Command,RetOpt.RetOpt());
+            self._add_Handler(STARTSURV_TrimComm_Command,StartSurvey.StartSurvey());
+
+            self._add_Handler(Survey_Stat_TrimComm_Command,SurveyStat.SurveyStat());
+            self._add_Handler(GET_CHALLENGE_RESPONSE_TrimComm_Command,Login.Login());
 
 
 
@@ -222,6 +300,8 @@ class Dcol:
 
 
             if self.packet_ID in Zero_Length_Commands :
+                if dump_decoded :
+                    print " Packet Data: " + ByteToHex (self.packet)
                 print " No Extra Information in Command, as expected"
                 print ""
             else:
@@ -253,3 +333,11 @@ import GetBase
 import RetBase
 import RetOpt
 import RetBreak
+import GetOpt
+import SurveyStat
+import Login
+import Station
+import SetAnt
+import GetTime
+import RetTime
+import StartSurvey
