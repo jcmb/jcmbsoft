@@ -5,6 +5,18 @@ import csv
 from datetime import datetime, time
 from pprint import pprint
 
+
+if len(sys.argv) != 1 :
+    sys.stderr.write(sys.argv[0]+"\n")
+    sys.stderr.write("\n")
+    sys.stderr.write("USAGE: GGK_2SEC <GGK/GGA File\n")
+    sys.stderr.write("\n")
+    sys.stderr.write("Converts times in a GGK/GGA file to be seconds of date instead of the HHMMSS format\n")
+    sys.stderr.write("Removes the checksum, you can use AddCheck to put them back on if required\n")
+    sys.stderr.write("Replacement for the orignal windows only ggk_2sec http://www.trimbletools.com/jcmbsoft/html/ggk_2sec.html\n")
+    sys.stderr.write("\n")
+    exit(1)
+
 # Code from http://stackoverflow.com/questions/6556078/how-to-read-a-csv-file-from-a-stream-and-process-each-line-as-it-is-written
 class ReadlineIterator(object):
     """An iterator that calls readline() to get its next value."""
