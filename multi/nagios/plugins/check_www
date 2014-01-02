@@ -1,7 +1,0 @@
-#! /bin/bash
-PLUGIN_DIR=`dirname $0`
-if [ $3 ] ; then
-   $PLUGIN_DIR/check_http -H $2 -p $3 -u "http://$1"
-else
-   $PLUGIN_DIR/check_http -I $1
-fi  
