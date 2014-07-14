@@ -25,8 +25,11 @@ sock = socket.socket(socket.AF_INET, # Internet
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
 sock.bind((UDP_IP, UDP_PORT))
 
+packet_number=0
 while True:
     data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
-#    sys.stderr.write("Packet From Address: {}:{}\n".format(addr[0],addr[1]))
+    packet_number+=1
+    sys.stderr.write("Packet: {} From Address: {}:{}\n".format(packet_number,addr[0],addr[1]))
+
     print (data,end="")
     sys.stdout.flush()
