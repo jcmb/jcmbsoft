@@ -14,7 +14,7 @@ Usage () {
   echo "  -z Download through the proxy"
   exit 1
 }
-
+PATH=.:$PATH
  # Tests for curl executable
 if ! type curl &> /dev/null ; then
    echo "Required curl executable not found in $PATH" >&2
@@ -68,7 +68,7 @@ fi
 
 
 echo "Creating clone file"
-curl --silent -o /dev/null  "http://$userpass@$ip/cgi-bin/app_fileUpdate.xml?operation=8&fileNumber=1&cloneFileName=$file.xml&Year=2010&Month=1&Day=1&Hour=0&Minute=0&RepeatMin=0&newAppFileName=&CloneFileName=$file&newCloneFileName=$file&cloneSecurityEnable=on&cloneTcpUdpPortEnable=on&cloneEtherBootEnable=on&cloneHttpEnable=on&cloneEmailFtpNtpEnable=on&cloneDataLoggerEnable=on&clonePositionEnable=on&cloneEphAlmEnable=on&cloneAlmEnable=on&cloneMiscellaneousEnable=on"
+curl --silent -o /dev/null  "http://$userpass@$ip/cgi-bin/app_fileUpdate.xml?operation=8&fileNumber=1&cloneFileName=$file.xml&Year=2010&Month=1&Day=1&Hour=0&Minute=0&RepeatMin=0&newAppFileName=&CloneFileName=$file&newCloneFileName=$file&cloneSecurityEnable=on&cloneTcpUdpPortEnable=on&cloneEtherBootEnable=on&cloneHttpEnable=on&cloneEmailFtpNtpEnable=on&cloneDataLoggerEnable=on&clonePositionEnable=on&&cloneMiscellaneousEnable=on"
 
 #echo sleeping 10 seconds
 sleep 1
